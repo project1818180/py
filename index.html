@@ -233,6 +233,9 @@
         </div>
 
         <div class="banner">
+            <div style="text-align: center; margin-bottom: 10px; font-weight: bold; color: white; background: rgba(0,0,0,0.2); padding: 5px; border-radius: 5px; font-size: 14px;">
+                Time Left: <span id="countdown-timer">00:00</span>
+            </div>
             <div>Payment Amount</div>
             <h1 id="disp-amount">₹0</h1>
         </div>
@@ -348,28 +351,38 @@
         }
 
         // --- 3. Auto-Check every 5 seconds ---
+        // Update timer and check expiry every 1 second
         setInterval(function() {
             const params = new URLSearchParams(window.location.search);
             const encoded = params.get('data');
             
-            // If already showing expired screen, do nothing
             if (document.getElementById('expired-screen').style.display === 'block') return;
-
+        
             if (encoded) {
                 try {
                     const data = JSON.parse(atob(encoded));
                     const now = Date.now();
                     const expiryTime = data.time + (data.duration * 60 * 1000);
-
-                    if (now > expiryTime) {
-                        // Time over: Save to storage and hide page
+                    const timeLeft = expiryTime - now;
+        
+                    if (timeLeft <= 0) {
+                        // Link Expired logic
                         localStorage.setItem('isExpired_' + encoded, 'true');
                         document.getElementById('main-content').style.display = 'none';
                         document.getElementById('expired-screen').style.display = 'block';
+                    } else {
+                        // Countdown calculation
+                        const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                        const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+                        
+                        // Show timer on screen
+                        document.getElementById('countdown-timer').innerText = 
+                            (minutes < 10 ? "0" + minutes : minutes) + ":" + 
+                            (seconds < 10 ? "0" + seconds : seconds);
                     }
                 } catch(e) {}
             }
-        }, 500);
+        }, 1000);
 
 
         // --- 4. Logic Functions (Copy, Modal, Pay) ---
@@ -454,3 +467,4 @@
 </body>
 
 </html>
+
