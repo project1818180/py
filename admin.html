@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Generate Link</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; background: #f0f0f0; }
+        .container { max-width: 500px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        input, button { width: 100%; padding: 10px; margin: 10px 0; box-sizing: border-box; }
+        button { background: #007bff; color: white; border: none; cursor: pointer; font-size: 16px; }
+        button:hover { background: #0056b3; }
+        .result { margin-top: 20px; padding: 10px; background: #e8f5e9; border: 1px solid #c8e6c9; display: none; word-wrap: break-word; }
+        label { font-weight: bold; }
+        body {
+            -webkit-user-select: none; /* For Safari */
+            -ms-user-select: none;     /* For IE/Edge */
+            user-select: none;         /* Universal setting */
+        }
+    </style>
+</head>
+<body>
+
+<div class="container" id="login-screen">
+    <h2>Admin Login</h2>
+    <input type="password" id="adminPass" placeholder="Enter Password">
+    <button onclick="checkLogin()">Login</button>
+</div>
+
+<div class="container" id="admin-panel" style="display: none;">
+    <h2>Payment Link Generator</h2>
+    
+    <label>Application Name:</label>
+    <input type="text" id="appName" value="My Payment App">
+    
+    <label>Product Name:</label>
+    <input type="text" id="prodName" value="Premium Recharge">
+
+    <label>User Name:</label>
+    <input type="text" id="userName" value="John Doe">
+
+    <label>UPI ID:</label>
+    <input type="text" id="upiId" value="example@upi">
+
+    <label>Amount (₹):</label>
+    <input type="number" id="amount" value="500">
+
+    <div style="margin-bottom: 15px; font-family: sans-serif;">
+    <label style="display: block; font-weight: bold; margin-bottom: 5px; color: #333;">
+        ایکسپائری ٹائم (منٹوں میں):
+    </label>
+    <input type="number" id="expiryMins" value="5" placeholder="مثلاً: 10" 
+        style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; outline: none;">
+    <small style="color: #666;">(یہاں وہ منٹ لکھیں جتنی دیر لنک ایکٹیو رکھنا ہے)</small>
+    </div>
+
+    <button onclick="generateLink()">Generate Link</button>
+
+    <div class="result" id="resultBox"></div>
+
+</div>
+
+<script>
+    // Simple password check
+    function checkLogin() {
+        const pass = document.getElementById('adminPass').value;
+        if(pass === "admin123") { // Password yahan change karein
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('admin-panel').style.display = 'block';
+        } else {
+            alert("Wrong Password!");
+        }
+    }
+
+    function generateLink() {
+        const appName = document.getElementById('appName').value;
+        const prodName = document.getElementById('prodName').value;
+        const userName = document.getElementById('userName').value;
+        const upiId = document.getElementById('upiId').value;
+        const amount = document.getElementById('amount').value;
+        const mins = document.getElementById('expiryMins').value; // ٹائمر باکس سے ویلیو لینا
+
+        if(!upiId || !amount) { alert("Please fill all fields"); return; }
+
+        // Create a data object
+        const data = {
+            app: appName,
+            prod: prodName,
+            user: userName,
+            upi: upiId,
+            amt: amount,
+            time: Date.now(), // Current time for expiry check
+            duration: mins // ٹائمر کی ویلیو بھی شامل کریں
+        };
+
+        // Encode data to base64 to make url look clean
+        const encodedData = btoa(JSON.stringify(data));
+        
+        // Assuming user file is named 'index.html' in the same folder
+        const currentUrl = window.location.href;
+        const basePath = currentUrl.substring(0, currentUrl.lastIndexOf('/'));
+        const finalLink = `${basePath}/index.html?data=${encodedData}`;
+
+        const resultBox = document.getElementById('resultBox');
+        resultBox.style.display = 'block';
+        // رزلٹ باکس کو نئے ڈیزائن سے بھرنا
+        resultBox.innerHTML = `
+        <div style="display: flex; margin-top: 10px; border: 1px solid #ccc; border-radius: 8px; overflow: hidden; background: #fff;">
+            <input type="text" id="copyInput" value="${finalLink}" readonly 
+                style="flex: 1; padding: 12px; border: none; outline: none; background: #f9f9f9; font-size: 14px;">
+            <button onclick="copyToClipboard(this)" 
+                style="background: #28a745; color: white; border: none; padding: 0 15px; cursor: pointer; font-weight: bold;">
+                Copy
+            </button>
+        </div>
+        <p style="color: #666; font-size: 12px; margin-top: 8px; text-align: center;">
+            Link Generated (Valid for 1 min for testing)
+        </p>
+    `;
+}
+// یہ فنکشن آپ کی اسکرپٹ میں کہیں بھی موجود نہیں ہے، اسے لازمی ڈالیں
+        function copyToClipboard(btn) {
+        const copyText = document.getElementById("copyInput");
+    
+        // لنک کو سلیکٹ کریں
+        copyText.select();
+        copyText.setSelectionRange(0, 99999); // موبائل کے لیے
+    
+        // کاپی کریں
+        navigator.clipboard.writeText(copyText.value);
+    
+        // بٹن کا ڈیزائن تھوڑی دیر کے لیے بدلیں تاکہ پتہ چلے کاپی ہو گیا
+        const originalText = btn.innerText;
+        btn.innerText = "Copied!";
+        btn.style.background = "#218838"; // گہرا سبز رنگ
+    
+        setTimeout(() => {
+            btn.innerText = originalText;
+            btn.style.background = "#28a745"; // واپس اصلی رنگ
+            }, 2000);
+        }
+        // 1. Right Click ko rokne ke liye
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+
+        // 2. Keyboard shortcuts (F12, Ctrl+U, Ctrl+Shift+I) ko rokne ke liye
+        document.onkeydown = function(e) {
+            // F12 key rokne ke liye
+            if (e.keyCode == 123) {
+                return false;
+            }
+            // Ctrl+Shift+I (Inspect) rokne ke liye
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) {
+                return false;
+            }
+            // Ctrl+Shift+J (Console) rokne ke liye
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) {
+                return false;
+            }
+            // Ctrl+U (View Source) rokne ke liye
+            if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) {
+                return false;
+            }
+        };
+</script>
+
+</body>
+</html>

@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Payment</title>
+    <style>
+        :root {
+            --theme-orange: #ff6b00; 
+            --bg-light: #f5f5f5;
+        }
+        body { 
+            font-family: Helvetica, Arial, sans-serif; 
+            margin: 0; 
+            padding: 10px; 
+            background: var(--bg-light); 
+            color: #333; 
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        .container { 
+            max-width: 480px; 
+            margin: 0 auto; 
+            background: #fff; 
+            padding: 20px; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
+        }
+        
+        /* Layout Structure */
+        .header-section { margin-bottom: 20px; }
+        .info-row { 
+            display: flex; 
+            justify-content: space-between; 
+            border-bottom: 1px solid #eee; 
+            padding: 10px 0; 
+            font-size: 14px; 
+        }
+        .info-label { font-weight: bold; color: #555; }
+        
+        /* Orange Banner */
+        .banner { 
+            background-color: var(--theme-orange); 
+            color: white; 
+            padding: 20px; 
+            border-radius: 10px; 
+            margin: 20px 0; 
+            text-align: left; 
+        }
+        .banner div { font-size: 14px; opacity: 0.9; }
+        .banner h1 { margin: 5px 0 0 0; font-size: 36px; }
+
+        /* Copy Input */
+        .input-group { 
+            display: flex; 
+            border: 1px solid #ccc; 
+            border-radius: 5px; 
+            overflow: hidden; 
+            margin-bottom: 15px; 
+            background: #fff; 
+        }
+        .input-group input { 
+            flex-grow: 1; 
+            border: none; 
+            padding: 12px; 
+            font-size: 16px; 
+            outline: none; 
+            color: #333; 
+        }
+        .copy-btn { 
+            background: white; 
+            color: #007bff; 
+            border: none; 
+            padding: 0 20px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            border-left: 1px solid #eee; 
+        }
+
+        /* Instructions */
+        .red-text { 
+            color: #d32f2f; 
+            font-weight: bold; 
+            font-size: 13px; 
+            line-height: 1.5; 
+            margin: 15px 0; 
+        }
+        
+        /* Payment Icons Grid */
+        .pay-icons { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 12px; 
+            margin: 20px 0; 
+        }
+        
+        /* Logo Center Styling */
+        .p-icon { 
+            border: 1px solid #d1d5db; 
+            border-radius: 8px; 
+            padding: 10px 15px; 
+            display: flex; 
+            align-items: center; 
+            /* Updated for Centering */
+            justify-content: center; 
+            position: relative;
+            background: #fff;
+            cursor: pointer;
+            min-height: 45px;
+        }
+        .p-icon img { 
+            height: 50px; 
+            width: auto; 
+            max-width: 95%; 
+            object-fit: contain; 
+        }
+        .p-icon .arrow { 
+            /* Arrow fixed to right */
+            position: absolute;
+            right: 15px;
+            color: #9ca3af; 
+            font-size: 20px; 
+            font-weight: bold; 
+        }
+
+        /* Submit Section */
+        .submit-btn { 
+            width: 100%; 
+            background: var(--theme-orange); 
+            color: white; 
+            border: none; 
+            padding: 15px; 
+            font-size: 18px; 
+            font-weight: bold; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            margin-top: 10px; 
+        }
+        /* Default Disabled Style (Grey) */
+        .submit-btn:disabled { 
+            background: #cccccc; 
+            cursor: not-allowed; 
+        }
+                
+        /* Messages */
+        .success-msg { 
+            background: #e8f5e9; 
+            color: #2e7d32; 
+            padding: 15px; 
+            text-align: center; 
+            border-radius: 5px; 
+            margin-bottom: 15px; 
+            display: none; 
+            font-weight: bold; 
+            border: 1px solid #c8e6c9; 
+        }
+        
+        /* Expired Screen */
+        #expired-screen { 
+            display: none; 
+            text-align: center; 
+            padding: 50px 20px; 
+        }
+        #main-content { display: block; }
+        
+        /* Modal */
+        .modal { 
+            display: none; 
+            position: fixed; 
+            z-index: 99; 
+            left: 0; 
+            top: 0; 
+            width: 100%; 
+            height: 100%; 
+            background-color: rgba(0,0,0,0.5); 
+        }
+        .modal-content { 
+            background-color: #fefefe; 
+            margin: 20% auto; 
+            padding: 20px; 
+            border-radius: 8px; 
+            width: 85%; 
+            max-width: 400px; 
+            position: relative; 
+        }
+        .close { 
+            float: right; 
+            font-size: 28px; 
+            font-weight: bold; 
+            cursor: pointer; 
+        }
+        .link-help { 
+            float: right; 
+            color: #007bff; 
+            font-size: 12px; 
+            cursor: pointer; 
+            text-decoration: underline; 
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="expired-screen">
+        <h2 style="color: #d32f2f;">Link Expired</h2>
+        <p>This payment link was valid for few minutes only.</p>
+        <p>Please ask the owner for a new link.</p>
+    </div>
+
+    <div class="container" id="main-content">
+        
+        <div id="success-msg" class="success-msg">UTR submitted successfully!</div>
+
+        <h3 style="margin:0 0 10px 0;">Personal Information</h3>
+        
+        <div class="info-row">
+            <span class="info-label">Application:</span>
+            <span id="disp-app-name">Loading...</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Product:</span>
+            <span id="disp-prod-name">Loading...</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Name:</span>
+            <span id="disp-user-name">Loading...</span>
+        </div>
+
+        <div style="margin-top: 25px;">
+            <h3 style="display:inline-block; margin:0;">UPI Information</h3>
+            <span class="link-help" onclick="openModal()">How it works ?</span>
+        </div>
+
+        <div class="banner">
+            <div>Payment Amount</div>
+            <h1 id="disp-amount">₹0</h1>
+        </div>
+
+        <p style="font-weight: bold; margin-bottom: 5px;">1. Copy UPI Information.</p>
+        <div class="input-group">
+            <input type="text" id="upi-text" readonly value="...">
+            <button class="copy-btn" onclick="copyUPI()">COPY</button>
+        </div>
+
+        <p style="color: black; font-weight: bold; margin-top: 10px;">
+            2. Transfer the amount you want to recharge to us 
+            <span style="color: red;">by UPI ID transfer, NOT MOBILE NUMBER.</span>
+        </p>
+
+        <div class="pay-icons">
+            <div class="p-icon" onclick="payWith('paytm')">
+                <img src="logo/paytm.png" alt="Paytm">
+                <span class="arrow">&rsaquo;</span>
+            </div>
+            <div class="p-icon" onclick="payWith('phonepe')">
+                <img src="logo/phonepe.png" alt="PhonePe">
+                <span class="arrow">&rsaquo;</span>
+            </div>
+            <div class="p-icon" onclick="payWith('gpay')">
+                <img src="logo/gpay.png" alt="GPay">
+                <span class="arrow">&rsaquo;</span>
+            </div>
+            <div class="p-icon" onclick="payWith('upi')">
+                <img src="logo/bhim.png" alt="BHIM">
+                <span class="arrow">&rsaquo;</span>
+            </div>
+        </div>
+
+        <p style="font-weight: bold; margin-bottom: 5px;">3. Please enter Ref No. to complete</p>
+        <small style="display:block; margin-bottom:5px; color:#555;">(Submit UTR)</small>
+        
+        <div class="input-group">
+            <input type="text" id="utr-input" placeholder="Enter 12-digit UTR" maxlength="12">
+        </div>
+
+        <button class="submit-btn" id="submit-btn" disabled onclick="submitUTR()">SUBMIT</button>
+    </div>
+
+    <div id="infoModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h3>How it works</h3>
+            <ol style="padding-left: 20px; line-height: 1.6;">
+                <li>Click <b>COPY</b> to copy the UPI ID.</li>
+                <li>Open Paytm/PhonePe/GPay.</li>
+                <li>Pay the exact amount shown in Orange Box.</li>
+                <li>Copy the <b>12-digit UTR/Ref No</b> from payment details.</li>
+                <li>Paste it here and click Submit.</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. Expiry Logic with LocalStorage (Refresh Proof) ---
+        function checkAndShowExpiry() {
+            const params = new URLSearchParams(window.location.search);
+            const encoded = params.get('data');
+            
+            // Check if already expired in storage
+            if (encoded && localStorage.getItem('isExpired_' + encoded) === 'true') {
+                document.getElementById('main-content').style.display = 'none';
+                document.getElementById('expired-screen').style.display = 'block';
+                return true; // Return true means expired
+            }
+            return false;
+        }
+
+        // --- 2. Load Data ---
+        function loadData() {
+            // First check if already expired
+            if (checkAndShowExpiry()) return;
+
+            const params = new URLSearchParams(window.location.search);
+            const encoded = params.get('data');
+
+            if (!encoded) {
+                document.body.innerHTML = "<h2 style='text-align:center; margin-top:50px;'>Invalid Link</h2>";
+                return;
+            }
+
+            try {
+                const jsonString = atob(encoded);
+                const data = JSON.parse(jsonString);
+
+                // Initial time check
+                const now = Date.now();
+                const expiryTime = data.time + (data.duration * 60 * 1000);
+
+                if (now > expiryTime) {
+                    // Mark as expired in storage
+                    localStorage.setItem('isExpired_' + encoded, 'true');
+                    checkAndShowExpiry();
+                    return;
+                }
+
+                // Fill Data
+                document.getElementById('disp-app-name').innerText = data.app;
+                document.getElementById('disp-prod-name').innerText = data.prod;
+                document.getElementById('disp-user-name').innerText = data.user;
+                document.getElementById('disp-amount').innerText = "₹" + data.amt;
+                document.getElementById('upi-text').value = data.upi;
+
+            } catch (e) {
+                console.error(e);
+                document.body.innerHTML = "<h2 style='text-align:center; margin-top:50px;'>Corrupted Link</h2>";
+            }
+        }
+
+        // --- 3. Auto-Check every 5 seconds ---
+        setInterval(function() {
+            const params = new URLSearchParams(window.location.search);
+            const encoded = params.get('data');
+            
+            // If already showing expired screen, do nothing
+            if (document.getElementById('expired-screen').style.display === 'block') return;
+
+            if (encoded) {
+                try {
+                    const data = JSON.parse(atob(encoded));
+                    const now = Date.now();
+                    const expiryTime = data.time + (data.duration * 60 * 1000);
+
+                    if (now > expiryTime) {
+                        // Time over: Save to storage and hide page
+                        localStorage.setItem('isExpired_' + encoded, 'true');
+                        document.getElementById('main-content').style.display = 'none';
+                        document.getElementById('expired-screen').style.display = 'block';
+                    }
+                } catch(e) {}
+            }
+        }, 5000);
+
+
+        // --- 4. Logic Functions (Copy, Modal, Pay) ---
+        function copyUPI() {
+            const copyText = document.getElementById("upi-text");
+            copyText.select();
+            copyText.setSelectionRange(0, 99999);
+            navigator.clipboard.writeText(copyText.value);
+            // Removed Alert for cleaner UI, or keep if you want
+            // alert("UPI ID Copied!"); 
+        }
+
+        function payWith(app) {
+            const upi = document.getElementById('upi-text').value;
+            const amount = document.getElementById('disp-amount').innerText.replace('₹', '');
+            window.location.href = `upi://pay?pa=${upi}&am=${amount}`;
+        }
+
+        // Modal Logic
+        const modal = document.getElementById("infoModal");
+        function openModal() { modal.style.display = "block"; }
+        function closeModal() { modal.style.display = "none"; }
+        window.onclick = function(e) { if (e.target == modal) closeModal(); }
+
+
+        // --- 5. Input & Button Logic (Orange Color Fix) ---
+        const utrInput = document.getElementById('utr-input');
+        const btn = document.getElementById('submit-btn');
+
+        utrInput.addEventListener('input', function() {
+            this.value = this.value.replace(/[^0-9]/g, ''); // Only numbers
+            
+            if (this.value.length === 12) {
+                btn.disabled = false;
+                btn.style.background = "#ff6b00"; 
+            } else {
+                btn.disabled = true;
+                btn.style.background = "#cccccc"; 
+            }
+        });
+
+        // --- 6. Final Submit Function ---
+        function submitUTR() {
+            const utrInput = document.getElementById('utr-input');
+            const submitBtn = document.getElementById('submit-btn');
+            const successMsg = document.getElementById('success-msg');
+
+            if (utrInput.value.length < 12) return;
+
+            // Update UI
+            submitBtn.innerText = "SUBMITTED";
+            submitBtn.disabled = true;
+            
+            // FORCE ORANGE COLOR using setProperty priority
+            submitBtn.style.setProperty('background-color', '#ff6b00', 'important');
+            submitBtn.style.opacity = "1";
+            submitBtn.style.cursor = "not-allowed";
+
+            // Lock Input
+            utrInput.readOnly = true;
+            utrInput.style.backgroundColor = "#f0f0f0";
+            utrInput.style.pointerEvents = "none";
+
+            // Show Success
+            window.scrollTo(0,0);
+            successMsg.style.display = 'block';
+        }
+
+        // Run when page loads
+        window.onload = loadData;
+
+        // Security
+        document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+        document.onkeydown = function(e) {
+            if (e.keyCode == 123) return false;
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) return false;
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) return false;
+            if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false;
+        };
+
+    </script>
+</body>
+</html>
