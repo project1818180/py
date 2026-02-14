@@ -94,7 +94,8 @@
         };
 
         // Encode data to base64 to make url look clean
-        const encodedData = btoa(JSON.stringify(data));
+        const encodedData = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+
         
         // Assuming user file is named 'index.html' in the same folder
         const currentUrl = window.location.href;
@@ -166,4 +167,5 @@
 </script>
 
 </body>
+
 </html>
