@@ -324,8 +324,10 @@
             }
 
             try {
-                const jsonString = atob(encoded);
+                const cleanEncoded = encoded.replace(/\s/g, '').replace(/-/g, '+').replace(/_/g, '/');
+                const jsonString = decodeURIComponent(escape(atob(cleanEncoded)));
                 const data = JSON.parse(jsonString);
+                ;
 
                 // Initial time check
                 const now = Date.now();
@@ -468,6 +470,7 @@
 </body>
 
 </html>
+
 
 
 
