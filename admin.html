@@ -94,7 +94,8 @@
         };
 
         // Encode data to base64 to make url look clean
-        const encodedData = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+        const encodedData = btoa(JSON.stringify(data));
+
 
         
         // Assuming user file is named 'index.html' in the same folder
@@ -169,3 +170,4 @@
 </body>
 
 </html>
+
